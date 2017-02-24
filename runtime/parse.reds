@@ -21,10 +21,15 @@ parser: context [
 	#define PARSE_SAVE_SERIES [							;-- protect series stack from recursive calls
 		len: block/rs-length? series
 		series/head: series/head + len
+probe "PARSE_SAVE_SERIES"	
+probe series/head		
 	]
 	
 	#define PARSE_RESTORE_SERIES [
 		series/head: series/head - len
+probe "PARSE_RESTORE_SERIES"	
+probe series/head		
+		
 	]
 	
 	#define PARSE_PUSH_INPUTPOS  [
@@ -662,13 +667,15 @@ parser: context [
 		cnt: block/rs-length? rules
 		saved?: cnt <> 0
 		if saved? [
+probe "saving stack"		
 			p: as positions! ALLOC_TAIL(rules)
 			p/header: TYPE_POINT
 			p/input:  series/head
 			p/rule:   rules/head
 			
-			series/head: series/head + block/rs-length? series
+			series/head: series/head + block/rs-length? series			
 			rules/head:  rules/head + cnt + 1			;-- account for the new position! slot
+probe series/head			
 		]
 		saved?
 	]
@@ -679,11 +686,13 @@ parser: context [
 			p [positions!]
 	][
 		if rules/head > 0 [
+probe "restoring stack"		
 			s: GET_BUFFER(rules)
 			s/tail: s/tail - 1
 			p: as positions! s/tail
 			series/head: p/input
 			rules/head: p/rule
+probe series/head			
 		]
 	]
 	
@@ -782,13 +791,18 @@ parser: context [
 		cnt:	   0
 		cnt-col:   0
 		state:    ST_NEXT_ACTION
-		
+probe "entry"
+probe series/head
+dump4 GET_BUFFER(series)
+dump4 GET_BUFFER(input)
 		saved?: save-stack
 		base: stack/push*								;-- slot on stack for COPY/SET operations (until OPTION?() is fixed)
 		input: as red-series! block/rs-append series as red-value! input ;-- input now points to the series stack entry
 		cmd: (block/rs-head rule) - 1					;-- decrement to compensate for starting increment
 		tail: block/rs-tail rule						;TBD: protect current rule block from changes
-		
+probe series/head
+dump4 GET_BUFFER(series)
+
 		until [
 			#if debug? = yes [if verbose > 1 [print-state state]]
 			
@@ -1115,9 +1129,11 @@ parser: context [
 							R_INTO [
 								PARSE_CHECK_INPUT_EMPTY?
 								unless end? [match?: no]
-								
+probe "R_INTO"
 								s: GET_BUFFER(series)
-								s/tail: s/tail - 1
+probe series/head								
+dump4 s								
+								s/tail: s/tail - 1		;-- pop parsed input slot
 								input: as red-series! s/tail - 1
 								unless ended? [match?: no]
 								if match? [input/head: input/head + 1]	;-- skip parsed series
@@ -1538,17 +1554,24 @@ parser: context [
 							if TYPE_OF(value) <> TYPE_BLOCK [
 								PARSE_ERROR [TO_ERROR(script parse-end) words/_into]
 							]
-							value: block/rs-head input
-							type: TYPE_OF(value)
-							either all [ANY_SERIES?(type) type <> TYPE_IMAGE][
+							PARSE_CHECK_INPUT_EMPTY?
+							either end? [type: -1][		;-- make type fail the next test
+								value: block/rs-head input
+								type: TYPE_OF(value)
+							]
+							either all [ANY_SERIES?(type) type <> TYPE_IMAGE][							
 								input: as red-series! block/rs-append series value
+probe "INTO pushed"	
+probe series/head
+dump4 GET_BUFFER(series)
 								min:  R_NONE
 								type: R_INTO
 								state: ST_PUSH_RULE
 							][
+								cmd: cmd + 1
 								match?: no
 								PARSE_TRACE(_match)
-								state: ST_CHECK_PENDING
+								state: either end? [ST_POP_RULE][ST_CHECK_PENDING]
 							]
 						]
 						sym = words/insert [			;-- INSERT

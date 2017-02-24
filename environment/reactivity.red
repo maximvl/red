@@ -242,6 +242,7 @@ system/reactivity: context [
 			]
 			'else [
 				found?: no
+?? reaction				
 				parse reaction rule: [
 					any [
 						item: [path! | lit-path! | get-path!] (
@@ -276,7 +277,7 @@ system/reactivity: context [
 								unless later [do-safe reaction]
 								found?: yes
 							]
-							parse saved rule
+							;parse saved rule
 						)
 						| set-path! | any-string!
 						| into rule
