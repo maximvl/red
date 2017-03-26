@@ -36,6 +36,7 @@ system/console: context [
 	catch?:	 no											;-- YES: force script to fallback into the console
 	count:	 [0 0 0]									;-- multiline counters for [squared curly parens]
 	ws:		 charset " ^/^M^-"
+  inspector:   none
 
 	gui?: #system [logic/box #either gui-console? = yes [yes][no]]
 	

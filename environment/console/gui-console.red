@@ -18,6 +18,7 @@ Red [
 #include %help.red
 #include %engine.red
 #include %auto-complete.red
+#include %inspector.red
 
 #system [
 	#include %terminal.reds
@@ -103,6 +104,9 @@ gui-console-ctx: context [
 		]
 		apply-cfg
 		win/selected: console
+
+    if system/console/inspector [ system/console/inspector/init ]
+		system/view/auto-sync?: yes
 		win/visible?: yes
 	]
 	
@@ -238,6 +242,7 @@ gui-console-ctx: context [
 			"Options" [
 				"Choose Font..."	choose-font
 				"Settings..."		settings
+        "Inspect words"         inspect
 			]
 		]
 		actors: object [
@@ -247,6 +252,7 @@ gui-console-ctx: context [
 					quit			[self/on-close face event]
 					choose-font		[if font: request-font/font/mono console/font [console/font: font]]
 					settings		[show-cfg-dialog]
+          inspect [if system/console/inspector [system/console/inspector/show]]
 				]
 			]
 			on-close: func [face [object!] event [event!]][
