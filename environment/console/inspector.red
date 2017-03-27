@@ -68,16 +68,18 @@ system/console/inspector: context [
          sys-words:  check "System words" data spec/system [
             spec/system: sys-words/data
             list/data: words: make-words spec
+            search/on-change
          ] 150
          user-words: check "User words" data spec/user [
             spec/user: user-words/data
             list/data: words: make-words spec
+            search/on-change
          ] 150
          search: field on-change [
             list/data: either empty? search/text [words] [
                filter words func [w] [ find w search/text ]
             ]
-         ] 150
+         ] 150 hint "filter"
          list: text-list [desc/text: fetch-help to-word pick list/data list/selected ] data words 150x300
          return
          text "Description"
