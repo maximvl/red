@@ -9,9 +9,9 @@ REBOL [
 	}
 ]
 
-unless value? 'system-dialect [
+; unless value? 'system-dialect [
 	do %compiler.r
-]
+; ]
 
 unless exists? %builds/ [make-dir %builds/]
 

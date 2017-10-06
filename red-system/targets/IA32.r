@@ -540,6 +540,7 @@ make target-class [
 
 	emit-prolog: func [name locals [block!] args-size [integer!]][
 		if verbose >= 3 [print [">>>building:" uppercase mold to-word name "prolog"]]
+        print ["> prolog:" mold to-word name]
 		
 		emit #{55}									;-- PUSH ebp
 		emit #{89E5}								;-- MOV ebp, esp

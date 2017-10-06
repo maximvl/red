@@ -598,6 +598,7 @@ system-dialect: context [
 						path!
 						set-path!
 					] type?/word pc/1 [
+                        ; print ["   pc/1" pc/1]
 						fetch-expression/final
 					]
 					'else [throw-error 'syntax]
@@ -606,8 +607,11 @@ system-dialect: context [
 		]
 		
 		comp-func: func [name spec body /local args-size][
+            print [">>> compiling" name]
 			locals: spec
 			args-size: emitter/enter name locals
+            unless name = 'schedule [ insert body 'schedule ]
+            probe body
 			pc: body
 			comp-dialect
 			emitter/leave name locals args-size

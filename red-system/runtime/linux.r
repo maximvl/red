@@ -22,11 +22,17 @@ prolog {
 	]
 	
 	newline: "^^/"
-	stdout: 1
+    stdout: 1
+
+    scheduler: context [0 0 0 0]
+
+    schedule: func [] [
+        write stdout "scheduling^^/" 11
+    ]
 
 	prin: func [s [string!] return: [integer!]][
 		write stdout s length? s
-	]
+    ]
 
 	print: func [s [string!] return: [integer!]][
 		prin s
